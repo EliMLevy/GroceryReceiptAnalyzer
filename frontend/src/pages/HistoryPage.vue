@@ -23,7 +23,7 @@ export default {
     };
 
     try {
-      let response = await fetch('http://localhost:5000/data', requestOptions)
+      let response = await fetch(import.meta.env.VUE_APP_API_ENDPOINT + ':' + import.meta.env.VUE_APP_API_PORT + '/data', requestOptions)
       let result = await response.json();
       this.data = result.map(elem => {
         elem.id = Math.random() * 1000

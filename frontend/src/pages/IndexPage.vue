@@ -17,7 +17,7 @@
       v-if="groceryStoreName"
     >
       <q-uploader
-        :url="'http://localhost:5000/upload?store=' + groceryStoreName"
+        :url="import.meta.env.VUE_APP_API_ENDPOINT + ':' + import.meta.env.VUE_APP_API_PORT +'/upload?store=' + groceryStoreName"
         style="max-width: 300px"
         @uploaded="uploadComplete"
       />
@@ -71,7 +71,7 @@ export default defineComponent({
       try {
         this.loading = true;
         let response = await fetch(
-          'http://localhost:5000/storelist',
+          import.meta.env.VUE_APP_API_ENDPOINT + ':' + import.meta.env.VUE_APP_API_PORT +'/storelist',
           requestOptions
         );
         let result = await response.text();

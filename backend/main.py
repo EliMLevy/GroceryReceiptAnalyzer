@@ -72,8 +72,20 @@ def get_data():
     return database.reset_index().to_json(orient='records')
 
 
+@app.route('/', methods=['GET'])
+def get_data():
+    return "Hello world!"
+
+
+@app.route('/emptydb', methods=['GET'])
+def get_data():
+    database = pd.DataFrame(columns=['food', 'price', 'store', 'date'])
+    datetime.to_csv('db.csv')
+    return "Done!"
+
+
 
 if __name__ == '__main__':
     if not os.path.exists('./uploads'):
         os.mkdir('./uploads')
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=3000, debug=True)
