@@ -1,23 +1,35 @@
 <template>
   <q-page class="q-ma-md column items-center" v-if="!loading">
     <div class="q-mr-md" v-if="successfulUpload">
-      <q-chip  color="teal" text-color="white" icon="check">
+      <q-chip color="teal" text-color="white" icon="check">
         Successful Upload
       </q-chip>
     </div>
-    <div class="input-container q-my-md row items-center">
-      <h2 class="q-mr-md text-h5">Grocery Store:</h2>
-      <q-input outlined v-model="groceryStoreName" label="name" />
+    <div class="input-container row "  style="width: 100%;" v-if="true">
+      <div class="col">
+        <h2 class="text-h6">Grocery Store:</h2>
+      </div>
+      <div class="col-6" >
+        <addable-select style="width: 100%;"  :storeOptions="['Trader Joe\'s', 'Key Food']" :setSelection="(store) => groceryStoreName=store" />
+      </div>
+    </div>
+    <div class="input-container row " style="width: 100%;">
+      <div class="col">
+        <h2 class="text-h6">Date:</h2>
+      </div>
+      <div class="col" >
+        <my-date-picker :setDate="(date) => shoppingDate = date"/>
+      </div>
     </div>
     <div
       :class="{
         'uploader column items-center': true,
         'fade-in': groceryStoreName,
       }"
-      v-if="groceryStoreName"
+      v-if="groceryStoreName && shoppingDate"
     >
       <q-uploader
-        :url="import.meta.env.VUE_APP_API_ENDPOINT + ':' + import.meta.env.VUE_APP_API_PORT +'/upload?store=' + groceryStoreName"
+        :url="APIHostname + '/upload?store=' + groceryStoreName"
         style="max-width: 300px"
         @uploaded="uploadComplete"
       />
@@ -43,6 +55,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import MyTable from '../components/EditableTable.vue';
+import AddableSelect from 'src/components/AddableSelect.vue';
+import MyDatePicker from 'src/components/MyDatePicker.vue';
 
 export default defineComponent({
   name: 'IndexPage',
@@ -71,7 +85,7 @@ export default defineComponent({
       try {
         this.loading = true;
         let response = await fetch(
-          import.meta.env.VUE_APP_API_ENDPOINT + ':' + import.meta.env.VUE_APP_API_PORT +'/storelist',
+          process.env.API + '/storelist?' + 'date=' + this.shoppingDate,
           requestOptions
         );
         let result = await response.text();
@@ -81,7 +95,7 @@ export default defineComponent({
         this.successfulUpload = true;
       } catch (error) {
         console.log(error);
-        this.successfulUpload = false
+        this.successfulUpload = false;
       }
       this.loading = false;
     },
@@ -94,17 +108,21 @@ export default defineComponent({
   data() {
     return {
       groceryStoreName: undefined,
+      shoppingDate: undefined,
       // ocrResult: [{"index":0,"food":"Sparkling Apple Cider","price":5.79,"store":"Key Food"},{"index":1,"food":"RICE SELECT SUSHI","price":9.79,"store":"Key Food"},{"index":2,"food":"Shredded Mozerella Cheese","price":4.99,"store":"Key Food"},{"index":3,"food":"Shredded Mozerella Cheese","price":4.99,"store":"Key Food"}],
       // edittedList: [{"index":0,"food":"Sparkling Apple Cider","price":5.79,"store":"Key Food"},{"index":1,"food":"RICE SELECT SUSHI","price":9.79,"store":"Key Food"},{"index":2,"food":"Shredded Mozerella Cheese","price":4.99,"store":"Key Food"},{"index":3,"food":"Shredded Mozerella Cheese","price":4.99,"store":"Key Food"}],
       ocrResult: undefined,
       edittedList: undefined,
       loading: false,
-      successfulUpload: false
+      successfulUpload: false,
+      APIHostname: process.env.API
     };
   },
   components: {
     MyTable,
-  },
+    AddableSelect,
+    MyDatePicker
+},
 });
 </script>
 

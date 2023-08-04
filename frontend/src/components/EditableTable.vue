@@ -5,7 +5,7 @@
         <q-tr :props="props">
           <q-td key="food" :props="props">
             {{ props.row.food }}
-            <q-popup-edit v-model="props.row.food" title="Update calories" buttons v-slot="scope">
+            <q-popup-edit v-model="props.row.food"  buttons v-slot="scope">
               <q-input type="text" v-model="scope.value" dense autofocus />
             </q-popup-edit>
           </q-td>

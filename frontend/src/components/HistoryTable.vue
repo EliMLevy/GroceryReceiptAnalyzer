@@ -46,6 +46,14 @@ const columns = [
     field: (row) => row.store,
     sortable: true,
   },
+  {
+    name: 'date',
+    required: true,
+    label: 'Date',
+    align: 'left',
+    field: (row) => row.date,
+    sortable: true,
+  },
 ];
 
 
@@ -53,7 +61,7 @@ export default {
   setup() {
     const $q = useQuasar();
     function wrapCsvValue(val, formatFn, row) {
-      let formatted = formatFn !== void 0 ? formatFn(val, row) : val;
+      let formatted = val;
 
       formatted =
         formatted === void 0 || formatted === null ? '' : String(formatted);
