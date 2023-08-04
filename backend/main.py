@@ -31,7 +31,12 @@ def upload():
         filename = './uploads/%s' % secure_filename(fname)
         f.save(filename)
 
-    result = receipt_OCR(filename, store)
+    try:
+        result = receipt_OCR(filename, store)
+    except Exception as e:
+        return [{
+            "Error": e
+        }]
     return result.reset_index().to_json(orient='records')
     # return [{"index":0,"food":"Sparkling Apple Cider","price":5.79,"store":"Key Food"},{"index":1,"food":"RICE SELECT SUSHI","price":9.79,"store":"Key Food"},{"index":2,"food":"Shredded Mozerella Cheese","price":4.99,"store":"Key Food"},{"index":3,"food":"Shredded Mozerella Cheese","price":4.99,"store":"Key Food"}]
 
@@ -40,30 +45,49 @@ def upload():
 def store_list():
     database = pd.read_csv('./db.csv')
 
-    date = request.args.get('date')
-    data = request.get_json(force=True)
-    old = data["old"]
-    new = data["new"]
+    try:
+        date = request.args.get('date')
+        data = request.get_json(force=True)
+        old = data["old"]
+        new = data["new"]
+    except Exception as e:
+        return {
+            "msg": "Error parsing input",
+            "error": e
+        }
 
-    changed = False
-    for row in new:
-        if row["food"] != old[row["index"]]["food"]:
-            mappings[old[row["index"]]["food"]] = row["food"]
-            changed = True
+    try:
+        changed = False
+        for row in new:
+            if row["food"] != old[row["index"]]["food"]:
+                mappings[old[row["index"]]["food"]] = row["food"]
+                changed = True
 
-    if changed:
-        mapping_file = open('./mappings.json', 'w')
-        mapping_file.write(json.dumps(mappings))
-        mapping_file.close()
+        if changed:
+            mapping_file = open('./mappings.json', 'w')
+            mapping_file.write(json.dumps(mappings))
+            mapping_file.close()
 
-    df = pd.DataFrame.from_records(new)
-    df["date"] = [date for _ in df["food"]]
+    except Exception as e:
+        return {
+            "msg": "Error finding changed foods",
+            "error": e
+        }
 
-    df = df.drop('index', axis=1)
-    print(df)
+    try:
+        df = pd.DataFrame.from_records(new)
+        df["date"] = [date for _ in df["food"]]
 
-    database = pd.concat([database, df])
-    database.to_csv("./db.csv", index=False)
+        df = df.drop('index', axis=1)
+        print(df)
+
+        database = pd.concat([database, df])
+        database.to_csv("./db.csv", index=False)
+    except Exception as e:
+        return {
+            "msg": "Error persisting data",
+            "error": e
+        }
 
     return "Okay!"
 
