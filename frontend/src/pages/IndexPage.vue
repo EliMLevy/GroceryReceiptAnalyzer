@@ -5,20 +5,24 @@
         Successful Upload
       </q-chip>
     </div>
-    <div class="input-container row "  style="width: 100%;" v-if="true">
+    <div class="input-container row" style="width: 100%" v-if="true">
       <div class="col">
         <h2 class="text-h6">Grocery Store:</h2>
       </div>
-      <div class="col-6" >
-        <addable-select style="width: 100%;"  :storeOptions="['Trader Joe\'s', 'Key Food']" :setSelection="(store) => groceryStoreName=store" />
+      <div class="col-6">
+        <addable-select
+          style="width: 100%"
+          :storeOptions="['Trader Joe\'s', 'Key Food']"
+          :setSelection="(store: any) => groceryStoreName=store"
+        />
       </div>
     </div>
-    <div class="input-container row " style="width: 100%;">
+    <div class="input-container row" style="width: 100%">
       <div class="col">
         <h2 class="text-h6">Date:</h2>
       </div>
-      <div class="col" >
-        <my-date-picker :setDate="(date) => shoppingDate = date"/>
+      <div class="col">
+        <my-date-picker :setDate="(date: any) => shoppingDate = date" />
       </div>
     </div>
     <div
@@ -32,11 +36,12 @@
         :url="APIHostname + '/upload?store=' + groceryStoreName"
         style="max-width: 300px"
         @uploaded="uploadComplete"
+        @failed="uploadFailed"
       />
     </div>
 
     <div
-      :class="{ 'table-container': true, 'fade-in': ocrResult || true }"
+      :class="{ 'table-container': true, 'fade-in': ocrResult }"
       style="max-width: 100%"
       v-if="ocrResult"
     >
@@ -53,13 +58,27 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'; 
 import MyTable from '../components/EditableTable.vue';
 import AddableSelect from 'src/components/AddableSelect.vue';
 import MyDatePicker from 'src/components/MyDatePicker.vue';
+import { useQuasar } from 'quasar';
 
 export default defineComponent({
   name: 'IndexPage',
+  setup() {
+    const $q = useQuasar();
+    return {
+      uploadFailed(e: any) {
+        console.log(JSON.parse(e.xhr.response));
+        $q.notify({
+          message: JSON.parse(e.xhr.response).msg,
+          color: 'negative',
+          icon: 'warning',
+        });
+      },
+    };
+  },
   methods: {
     uploadComplete(e: any) {
       console.log(JSON.parse(e.xhr.response));
@@ -115,14 +134,14 @@ export default defineComponent({
       edittedList: undefined,
       loading: false,
       successfulUpload: false,
-      APIHostname: process.env.API
+      APIHostname: process.env.API,
     };
   },
   components: {
     MyTable,
     AddableSelect,
-    MyDatePicker
-},
+    MyDatePicker,
+  },
 });
 </script>
 
