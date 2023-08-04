@@ -40,6 +40,7 @@ def upload():
 def store_list():
     database = pd.read_csv('./db.csv')
 
+    date = request.args.get('date')
     data = request.get_json(force=True)
     old = data["old"]
     new = data["new"]
@@ -56,7 +57,7 @@ def store_list():
         mapping_file.close()
 
     df = pd.DataFrame.from_records(new)
-    df["date"] = [datetime.datetime.now() for _ in df["food"]]
+    df["date"] = [date for _ in df["food"]]
 
     df = df.drop('index', axis=1)
     print(df)
@@ -73,14 +74,14 @@ def get_data():
 
 
 @app.route('/', methods=['GET'])
-def get_data():
+def home():
     return "Hello world!"
 
 
 @app.route('/emptydb', methods=['GET'])
-def get_data():
+def empty_database():
     database = pd.DataFrame(columns=['food', 'price', 'store', 'date'])
-    datetime.to_csv('db.csv')
+    database.to_csv('db.csv', index=False)
     return "Done!"
 
 
