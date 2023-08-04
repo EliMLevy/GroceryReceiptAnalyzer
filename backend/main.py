@@ -5,6 +5,7 @@ import os
 import json
 import pandas as pd
 import datetime
+import traceback
 
 from receipt_OCR import receipt_OCR
 
@@ -34,11 +35,12 @@ def upload():
     try:
         result = receipt_OCR(filename, store)
     except Exception as e:
-        return [{
-            "Error": e
-        }]
+        print(traceback.print_exc())
+        return {
+            "msg": "Error extracting text from image. Try adjusting the crop or orientation of the picture.",
+            "error": str(e)
+        }, 500
     return result.reset_index().to_json(orient='records')
-    # return [{"index":0,"food":"Sparkling Apple Cider","price":5.79,"store":"Key Food"},{"index":1,"food":"RICE SELECT SUSHI","price":9.79,"store":"Key Food"},{"index":2,"food":"Shredded Mozerella Cheese","price":4.99,"store":"Key Food"},{"index":3,"food":"Shredded Mozerella Cheese","price":4.99,"store":"Key Food"}]
 
 
 @app.route('/storelist', methods=['POST'])
@@ -54,7 +56,7 @@ def store_list():
         return {
             "msg": "Error parsing input",
             "error": e
-        }
+        }, 500
 
     try:
         changed = False
@@ -72,7 +74,7 @@ def store_list():
         return {
             "msg": "Error finding changed foods",
             "error": e
-        }
+        }, 500
 
     try:
         df = pd.DataFrame.from_records(new)
@@ -87,7 +89,7 @@ def store_list():
         return {
             "msg": "Error persisting data",
             "error": e
-        }
+        }, 500
 
     return "Okay!"
 

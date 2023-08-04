@@ -29,6 +29,16 @@ def run_extraction(store_name, food_img_path, prices_img_path):
 
     print(len(prices_formatted), len(foods_formatted))
 
+    num_prices = len(prices_formatted)
+    num_food = len(foods_formatted)
+
+    if num_prices < num_food:
+        for i in range(num_food - num_prices):
+            prices_formatted.append('0')
+    elif num_food < num_prices:
+        for i in range(num_prices - num_food):
+            foods_formatted.append("-")
+
     food_mapping_file = open("./mappings.json", "r")
     food_mapping = json.loads(food_mapping_file.read())
 
