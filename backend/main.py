@@ -7,11 +7,12 @@ import pandas as pd
 import datetime
 import traceback
 
+import database
 from receipt_OCR import receipt_OCR
 
 app = Flask(__name__)
 
-mapping_file = open('./mappings.json', 'r')
+mapping_file = open('./data/mappings.json', 'r')
 mappings = json.loads(mapping_file.read())
 mapping_file.close()
 
@@ -45,8 +46,6 @@ def upload():
 
 @app.route('/storelist', methods=['POST'])
 def store_list():
-    database = pd.read_csv('./db.csv')
-
     try:
         date = request.args.get('date')
         data = request.get_json(force=True)
@@ -66,7 +65,7 @@ def store_list():
                 changed = True
 
         if changed:
-            mapping_file = open('./mappings.json', 'w')
+            mapping_file = open('./data/mappings.json', 'w')
             mapping_file.write(json.dumps(mappings))
             mapping_file.close()
 
@@ -83,8 +82,7 @@ def store_list():
         df = df.drop('index', axis=1)
         print(df)
 
-        database = pd.concat([database, df])
-        database.to_csv("./db.csv", index=False)
+        database.insert_df(df)
     except Exception as e:
         return {
             "msg": "Error persisting data",
@@ -95,8 +93,8 @@ def store_list():
 
 @app.route('/data', methods=['GET'])
 def get_data():
-    database = pd.read_csv('./db.csv')
-    return database.reset_index().to_json(orient='records')
+    table = database.get_table()
+    return table.reset_index().to_json(orient='records')
 
 
 @app.route('/', methods=['GET'])
@@ -106,8 +104,7 @@ def home():
 
 @app.route('/emptydb', methods=['GET'])
 def empty_database():
-    database = pd.DataFrame(columns=['food', 'price', 'store', 'date'])
-    database.to_csv('db.csv', index=False)
+    database.clear_table()
     return "Done!"
 
 

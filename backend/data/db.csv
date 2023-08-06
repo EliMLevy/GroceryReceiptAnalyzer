@@ -1,0 +1,7 @@
+id,food,price,store,date,tags
+45223,sethseq,1.24,Trader Joes,2023/08/05,"['1', '2', '3']"
+321,aefw,121.0,asefa,awefa,"['a', 'b', 'c']"
+432,faew,3123.0,faew,afwefa,"['d', 'e', 'f']"
+45223,sethseq,1.24,Trader Joes,2023/08/05,"['1', '2', '3']"
+321,aefw,121,asefa,awefa,"['a', 'b', 'c']"
+432,faew,3123,faew,afwefa,"['d', 'e', 'f']"

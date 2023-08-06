@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import json
 import re
+import uuid
 
 pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 
@@ -39,13 +40,19 @@ def run_extraction(store_name, food_img_path, prices_img_path):
         for i in range(num_prices - num_food):
             foods_formatted.append("-")
 
-    food_mapping_file = open("./mappings.json", "r")
+    food_mapping_file = open("./data/mappings.json", "r")
     food_mapping = json.loads(food_mapping_file.read())
 
+
+    tags_file = open("./mappings.json", "r")
+    tags = json.loads(tags_file.read())
+
     df = pd.DataFrame()
-    df["food"] = [food_mapping[mapped_food] if mapped_food in food_mapping else mapped_food for mapped_food in foods_formatted]
+    df["id"] = [str(uuid.uuid4()) for _ in foods_formatted]
+    df["food"] = [food_mapping[food] if food in food_mapping else food for food in foods_formatted]
+    df["tags"] = [tags[food] if food in tags else food for food in foods_formatted]
     df["price"] = [re.sub(r'\.+', '.', price) for price in prices_formatted]
     df["store"] = [store_name for _ in foods_formatted]
 
-    df.to_csv("output.csv", index=False)
+    df.to_csv("data/output.csv", index=False)
     return df
