@@ -82,7 +82,7 @@ def store_list():
         df = df.drop('index', axis=1)
         print(df)
 
-        database.insert_df(df)
+        database.insert_df("food", df)
     except Exception as e:
         return {
             "msg": "Error persisting data",
@@ -93,8 +93,12 @@ def store_list():
 
 @app.route('/data', methods=['GET'])
 def get_data():
-    table = database.get_table()
-    return table.reset_index().to_json(orient='records')
+    food_table = database.get_table("food")
+    tag_table = database.get_table("tag")
+    return {
+        "food": food_table.reset_index().to_json(orient='records'),
+        "tags": tag_table.reset_index().to_json(orient='records')
+    }
 
 
 @app.route('/', methods=['GET'])
@@ -104,9 +108,28 @@ def home():
 
 @app.route('/emptydb', methods=['GET'])
 def empty_database():
-    database.clear_table()
-    return "Done!"
+    database.clear_table("food")
+    database.clear_table("tag")
+    return "Done"
 
+@app.route('/addtag', methods=['POST'])
+def add_tag():
+    body = request.get_json(force=True)
+    tag = body["tag"]
+    id = body["id"]
+    database.insert("tag", {
+        "id": id,
+        "tag": tag
+    })
+    return "Done"
+
+@app.route('/removetag', methods=['POST'])
+def remove_tag():
+    body = request.get_json(force=True)
+    tag = body["tag"]
+    id = body["id"]
+    database.delete_tag(id, tag)
+    return "Done"
 
 
 if __name__ == '__main__':

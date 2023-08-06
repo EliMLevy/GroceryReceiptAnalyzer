@@ -44,13 +44,13 @@ def run_extraction(store_name, food_img_path, prices_img_path):
     food_mapping = json.loads(food_mapping_file.read())
 
 
-    tags_file = open("./mappings.json", "r")
+    tags_file = open("./data/tags.json", "r")
     tags = json.loads(tags_file.read())
 
     df = pd.DataFrame()
     df["id"] = [str(uuid.uuid4()) for _ in foods_formatted]
     df["food"] = [food_mapping[food] if food in food_mapping else food for food in foods_formatted]
-    df["tags"] = [tags[food] if food in tags else food for food in foods_formatted]
+    df["tags"] = [tags[food] if food in tags else [] for food in foods_formatted]
     df["price"] = [re.sub(r'\.+', '.', price) for price in prices_formatted]
     df["store"] = [store_name for _ in foods_formatted]
 
