@@ -1,10 +1,5 @@
 <template>
   <q-page class="q-ma-md column items-center" v-if="!loading">
-    <div class="q-mr-md" v-if="successfulUpload">
-      <q-chip color="teal" text-color="white" icon="check">
-        Successful Upload
-      </q-chip>
-    </div>
     <div class="input-container row" style="width: 100%" v-if="true">
       <div class="col">
         <h2 class="text-h6">Grocery Store:</h2>
@@ -13,7 +8,7 @@
         <addable-select
           style="width: 100%"
           :storeOptions="['Trader Joe\'s', 'Key Food']"
-          :setSelection="(store: any) => groceryStoreName=store"
+          :setSelection="(store) => (groceryStoreName = store)"
         />
       </div>
     </div>
@@ -22,7 +17,7 @@
         <h2 class="text-h6">Date:</h2>
       </div>
       <div class="col">
-        <my-date-picker :setDate="(date: any) => shoppingDate = date" />
+        <my-date-picker :setDate="(date) => (shoppingDate = date)" />
       </div>
     </div>
     <div
@@ -47,7 +42,7 @@
     >
       <my-table
         :data="edittedList"
-        :setData="(data: any) => edittedList = data"
+        :setData="(data) => (edittedList = data)"
         :handleSubmit="submitEdittedList"
       />
     </div>
@@ -57,20 +52,20 @@
   </q-page>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'; 
+<script>
+import { defineComponent } from 'vue';
 import MyTable from '../components/EditableTable.vue';
 import AddableSelect from 'src/components/AddableSelect.vue';
 import MyDatePicker from 'src/components/MyDatePicker.vue';
 import { useQuasar } from 'quasar';
-import { storeNewList } from '../components/APICaller'
+import { storeNewList } from '../components/APICaller';
 
 export default defineComponent({
   name: 'IndexPage',
   setup() {
     const $q = useQuasar();
     return {
-      uploadFailed(e: any) {
+      uploadFailed(e) {
         console.log(JSON.parse(e.xhr.response));
         $q.notify({
           message: JSON.parse(e.xhr.response).msg,
@@ -78,13 +73,19 @@ export default defineComponent({
           icon: 'warning',
         });
       },
+      notify: $q.notify,
     };
   },
   methods: {
-    uploadComplete(e: any) {
+    uploadComplete(e) {
       console.log(JSON.parse(e.xhr.response));
       this.ocrResult = JSON.parse(e.xhr.response);
       this.edittedList = JSON.parse(e.xhr.response);
+      this.notify({
+        message: 'Success!',
+        color: 'positive',
+        icon: 'check',
+      });
     },
     async submitEdittedList() {
       console.log(
@@ -92,20 +93,35 @@ export default defineComponent({
         JSON.stringify(this.edittedList)
       );
 
-      this.loading = true;
-      let result = await storeNewList({
-        old: this.ocrResult,
-        new: this.edittedList,
-      }, this.shoppingDate)
-      if(result) {
-        this.resetPage();
-        this.successfulUpload = true;
-      } else {
-        this.successfulUpload = false;
+      if (this.edittedList != undefined) {
+        this.edittedList.forEach((elem) => {
+          elem.price = Number(elem.price);
+        });
+      }
 
+      this.loading = true;
+      let result = await storeNewList(
+        {
+          old: this.ocrResult,
+          new: this.edittedList,
+        },
+        this.shoppingDate
+      );
+      if (result) {
+        this.resetPage();
+        this.notify({
+          message: 'Success!',
+          color: 'positive',
+          icon: 'check',
+        });
+      } else {
+        this.notify({
+          message: 'Failed to upload data',
+          color: 'negative',
+          icon: 'warning',
+        });
       }
       this.loading = false;
-
     },
     resetPage() {
       this.groceryStoreName = undefined;
@@ -120,7 +136,6 @@ export default defineComponent({
       ocrResult: undefined,
       edittedList: undefined,
       loading: false,
-      successfulUpload: false,
       APIHostname: process.env.API,
     };
   },
