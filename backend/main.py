@@ -83,11 +83,22 @@ def store_list():
         print(df)
 
         database.insert_df("food", df)
+        with open('./data/tags.json', "r+") as f:
+            data = json.loads(f.read())
+            for i in range(len(df)):
+                row = df.iloc[i]
+                if row["food"] in data:
+                    for tag in data[row["food"]]:
+                        database.insert("tag", {"id": row["id"], "tag": tag})
+
+
     except Exception as e:
         return {
             "msg": "Error persisting data",
             "error": e
         }, 500
+    
+
 
     return "Okay!"
 
@@ -95,10 +106,16 @@ def store_list():
 def get_data():
     food_table = database.get_table("food")
     tag_table = database.get_table("tag")
-    return {
-        "food": food_table.reset_index().to_json(orient='records'),
-        "tags": tag_table.reset_index().to_json(orient='records')
-    }
+
+    tags_grouped = tag_table.groupby("id", group_keys=True)["tag"].apply(list).to_dict()
+    print(tags_grouped)
+    json_data = json.loads(food_table.reset_index().to_json(orient='records'))
+    for elem in json_data:
+        if elem["id"] in tags_grouped:
+            elem["tags"] = tags_grouped[elem["id"]]
+        else:
+            elem["tags"] = []
+    return json_data
 
 
 @app.route('/', methods=['GET'])
@@ -121,6 +138,21 @@ def add_tag():
         "id": id,
         "tag": tag
     })
+    food_item = database.get_food(id)
+    if len(food_item) == 0:
+        return "Done"
+    else:
+        food_item = food_item.iloc[0]
+
+    with open('./data/tags.json', "r+") as f:
+        data = json.loads(f.read())
+        f.seek(0)
+        if food_item["food"] not in data:
+            data[food_item["food"]] = [] 
+        data[food_item["food"]].append(tag)
+        data[food_item["food"]] = list(set(data[food_item["food"]]))
+        f.write(json.dumps(data,indent=4, separators=(',', ': ')))
+        f.truncate()
     return "Done"
 
 @app.route('/removetag', methods=['POST'])
@@ -129,8 +161,44 @@ def remove_tag():
     tag = body["tag"]
     id = body["id"]
     database.delete_tag(id, tag)
+    
+    food_item = database.get_food(id)
+    if len(food_item) == 0:
+        return "Done"
+    else:
+        food_item = food_item.iloc[0]
+
+    with open('./data/tags.json', "r+") as f:
+        data = json.loads(f.read())
+        f.seek(0)
+        if food_item["food"] not in data:
+            return "Done"
+        if tag not in data[food_item["food"]]:
+            return "Done"
+        data[food_item["food"]].remove(tag)
+        f.write(json.dumps(data,indent=4, separators=(',', ': ')))
+        f.truncate()
     return "Done"
 
+@app.route('/analysis/bytag', methods=["GET"])
+def get_expenses_by_tag():
+    data = pd.merge(database.get_table("food"), database.get_table("tag"), on="id")
+    summed = data.groupby("tag")["price"].sum()
+    return summed.to_dict()
+
+
+@app.route('/analysis/byweek', methods=["GET"])
+def get_expenses_by_week():
+    data = database.get_table("food")
+    data["week"] = data["date"].apply(lambda date: datetime.datetime.strptime(date, '%Y/%m/%d').timetuple().tm_yday // 7)
+    data["label"] = data["week"].apply(lambda week: (datetime.datetime(2023, 1, 1) + datetime.timedelta(days=week * 7)).strftime('%b %d'))
+    result = {}
+    for index, row in data.iterrows():
+        if row["label"] not in result:
+            result[row["label"]] = 0
+        result[row["label"]] += row["price"]
+
+    return result
 
 if __name__ == '__main__':
     if not os.path.exists('./uploads'):
