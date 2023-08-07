@@ -111,3 +111,18 @@ export const getExpensesByWeek = async function () {
     console.error(error);
   }
 };
+
+
+export const getTopTenExpenses = async function () {
+  const requestOptions: RequestInit = {
+    method: 'GET',
+    redirect: 'follow',
+  };
+  try {
+    const response = await fetch(process.env.API + '/analysis/toptenfood', requestOptions);
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error(error);
+  }
+};
