@@ -3,7 +3,7 @@
     id="my-chart-id"
     :options="chartOptions"
     :data="{
-      labels: Object.keys(data),
+      labels: Object.keys(data).map(elem => elem.substring(0, 15)),
       datasets: [{ data: Object.values(data) }],
     }"
   />
@@ -49,7 +49,6 @@ export default {
       },
     };
   },
-
   props: {
     data: {
       type: Object,
