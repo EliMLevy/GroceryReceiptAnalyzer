@@ -180,6 +180,14 @@ def remove_tag():
         f.truncate()
     return "Done"
 
+@app.route('/deleteentry', methods=["POST"])
+def delete_food_entry():
+    body = request.get_json(force=True)
+    id = body["id"]
+    database.delete_food(id)
+    return "Done"
+
+
 @app.route('/analysis/bytag', methods=["GET"])
 def get_expenses_by_tag():
     data = pd.merge(database.get_table("food"), database.get_table("tag"), on="id")
@@ -191,7 +199,7 @@ def get_expenses_by_tag():
 def get_expenses_by_week():
     data = database.get_table("food")
     data["week"] = data["date"].apply(lambda date: datetime.datetime.strptime(date, '%Y/%m/%d').timetuple().tm_yday // 7)
-    data["label"] = data["week"].apply(lambda week: (datetime.datetime(2023, 1, 1) + datetime.timedelta(days=week * 7)).strftime('%b %d'))
+    data["label"] = data["week"].apply(lambda week: (datetime.datetime(2023, 1, 1) + datetime.timedelta(days=week * 7)).strftime('%m/%d'))
     result = {}
     for index, row in data.iterrows():
         if row["label"] not in result:
@@ -199,6 +207,18 @@ def get_expenses_by_week():
         result[row["label"]] += row["price"]
 
     return result
+
+
+@app.route('/analysis/toptenfood', methods=["GET"])
+def get_top_ten_foods():
+    data = database.get_table("food")
+    grouped = data.groupby("food")["price"].sum()
+    if len(grouped) == 0:
+        return {}
+
+    print(grouped)
+    grouped = grouped.nlargest(10)
+    return grouped.to_dict()
 
 if __name__ == '__main__':
     if not os.path.exists('./uploads'):
