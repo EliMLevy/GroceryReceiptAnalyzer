@@ -1,8 +1,16 @@
 <template>
   <LineChart
-    :data="chartConfig"
+    :data="{
+      labels: Object.keys(data),
+      datasets: [{ data: Object.values(data) },{ data: Object.values(data).map(elem => dataMean), borderDash: [10,5], pointRadius: 0 }],
+    }"
     :options="{
       responsive: true,
+      plugins: {
+            legend: {
+                display: false
+            },
+        },
     }"
   />
 </template>
@@ -42,6 +50,7 @@ export default {
         datasets: [{ data: [40, 20, 12] }],
       },
       chartConfig: {
+        
         labels: [
           'January',
           'February',
@@ -61,5 +70,20 @@ export default {
       },
     };
   },
+  props: {
+    data: {
+      type: Object,
+      default: () => {return {'January':40, 'February':20, 'March':12}}
+    }
+  },
+  computed: {
+
+    dataMean() {
+      let sum = 0;
+      Object.values(this.data).forEach(elem => sum += elem);
+      return sum / Object.keys(this.data).length
+    }
+
+  }
 };
 </script>
