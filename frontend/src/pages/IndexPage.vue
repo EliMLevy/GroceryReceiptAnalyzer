@@ -63,6 +63,7 @@ import MyTable from '../components/EditableTable.vue';
 import AddableSelect from 'src/components/AddableSelect.vue';
 import MyDatePicker from 'src/components/MyDatePicker.vue';
 import { useQuasar } from 'quasar';
+import { storeNewList } from '../components/APICaller'
 
 export default defineComponent({
   name: 'IndexPage',
@@ -90,33 +91,21 @@ export default defineComponent({
         JSON.stringify(this.ocrResult),
         JSON.stringify(this.edittedList)
       );
-      var raw = JSON.stringify({
+
+      this.loading = true;
+      let result = await storeNewList({
         old: this.ocrResult,
         new: this.edittedList,
-      });
-
-      var requestOptions: RequestInit = {
-        method: 'POST',
-        body: raw,
-        redirect: 'follow',
-      };
-
-      try {
-        this.loading = true;
-        let response = await fetch(
-          process.env.API + '/storelist?' + 'date=' + this.shoppingDate,
-          requestOptions
-        );
-        let result = await response.text();
-        console.log(result);
-
+      }, this.shoppingDate)
+      if(result) {
         this.resetPage();
         this.successfulUpload = true;
-      } catch (error) {
-        console.log(error);
+      } else {
         this.successfulUpload = false;
+
       }
       this.loading = false;
+
     },
     resetPage() {
       this.groceryStoreName = undefined;
@@ -128,8 +117,6 @@ export default defineComponent({
     return {
       groceryStoreName: undefined,
       shoppingDate: undefined,
-      // ocrResult: [{"index":0,"food":"Sparkling Apple Cider","price":5.79,"store":"Key Food"},{"index":1,"food":"RICE SELECT SUSHI","price":9.79,"store":"Key Food"},{"index":2,"food":"Shredded Mozerella Cheese","price":4.99,"store":"Key Food"},{"index":3,"food":"Shredded Mozerella Cheese","price":4.99,"store":"Key Food"}],
-      // edittedList: [{"index":0,"food":"Sparkling Apple Cider","price":5.79,"store":"Key Food"},{"index":1,"food":"RICE SELECT SUSHI","price":9.79,"store":"Key Food"},{"index":2,"food":"Shredded Mozerella Cheese","price":4.99,"store":"Key Food"},{"index":3,"food":"Shredded Mozerella Cheese","price":4.99,"store":"Key Food"}],
       ocrResult: undefined,
       edittedList: undefined,
       loading: false,

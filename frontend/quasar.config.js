@@ -71,7 +71,7 @@ module.exports = configure(function (ctx) {
       env: {
         API: ctx.dev 
           ? 'http://localhost:3000'
-          : 'http://3.84.51.115:3000'
+          : 'http://54.208.31.8:3000'
       },
       // rawDefine: {}
       // ignorePublicFolder: true,
@@ -96,7 +96,9 @@ module.exports = configure(function (ctx) {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
     framework: {
-      config: {},
+      config: {
+        notify:{}
+      },
 
       // iconSet: 'material-icons', // Quasar icon set
       // lang: 'en-US', // Quasar language pack
@@ -109,7 +111,9 @@ module.exports = configure(function (ctx) {
       // directives: [],
 
       // Quasar plugins
-      plugins: []
+      plugins: [
+        'Notify'
+      ]
     },
 
     // animations: 'all', // --- includes all animations

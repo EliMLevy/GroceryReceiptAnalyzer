@@ -23,7 +23,6 @@
           </q-td>
           <q-td key="delete" :props="props" >
             <q-icon name="delete" size="20px" class="clickable-icon" @click="() => deleteEntry(props.row)"/>
-          
           </q-td>
         </q-tr>
       </template>
@@ -33,6 +32,8 @@
 </template>
 
 <script>
+// import AddableSelect from './AddableSelect.vue';
+
 const columns = [
   {
     name: 'food',
@@ -72,29 +73,30 @@ const columns = [
 // ];
 
 export default {
-  props: {
-    data: {
-      type: Array,
-      default: () => [],
+    props: {
+        data: {
+            type: Array,
+            default: () => [],
+        },
+        setData: {
+            type: Function
+        },
+        handleSubmit: {
+            type: Function,
+            default: () => console.log('Not Implemented')
+        }
     },
-    setData: {
-        type: Function
+    setup() {
+        return {
+            columns,
+        };
     },
-    handleSubmit: {
-        type: Function,
-        default: () => console.log('Not Implemented')
-    }
-  },
-  setup() {
-    return {
-      columns,
-    };
-  },
-  methods: {
-    deleteEntry(row) {
-        this.setData(this.data.filter(elem => elem.index != row.index))
-    }
-  },
+    methods: {
+        deleteEntry(row) {
+            this.setData(this.data.filter(elem => elem.index != row.index));
+        }
+    },
+    // components: { AddableSelect }
 };
 </script>
 

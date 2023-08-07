@@ -25,6 +25,9 @@
           <q-item clickable v-ripple href="/history">
             <q-item-section>History</q-item-section>
           </q-item>
+          <q-item clickable v-ripple href="/analysis">
+            <q-item-section>Analysis</q-item-section>
+          </q-item>
         </q-list>
       </q-scroll-area>
     </q-drawer>
