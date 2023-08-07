@@ -1,6 +1,6 @@
 import pandas as pd
 
-food_schema = ["id", "food", "price", "date"]
+food_schema = ["id", "food", "price", "store", "date"]
 tag_schema = ["id", "tag"]
 
 food_db_file = "data/food_table.csv"
