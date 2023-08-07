@@ -23,7 +23,6 @@ export default {
     const monthFormatted = todayDate.getMonth() + 1 > 9 ? todayDate.getMonth() + 1 : '0' + (todayDate.getMonth()  + 1)
     const dateFormatted = todayDate.getDate() + 1 > 9 ? todayDate.getDate() + 1 : '0' + (todayDate.getDate()  + 1)
     const today = `${todayDate.getFullYear()}/${monthFormatted}/${dateFormatted}`
-    console.log(today)
     return {
       date: ref(today),
     };

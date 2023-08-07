@@ -18,7 +18,6 @@ import { ref , toRefs} from 'vue';
 export default {
   setup(props) {
     const { storeOptions } = toRefs(props)
-    console.log(storeOptions.value)
     const filterOptions = ref([...storeOptions.value]);
 
     return {
